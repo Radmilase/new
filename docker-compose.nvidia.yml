@@ -1,0 +1,66 @@
+version: '3.9'
+name: 'master'
+
+services:
+  scene:
+    image: registry.gitlab.com/beerlab/iprofi2024/problem/master/scene:latest
+    container_name: scene_master
+    environment:
+      - DISPLAY
+      - XAUTORITY
+      - QT_X11_NO_MITSHM=1
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    ipc: host
+    stdin_open: true
+    tty: true
+    networks:
+      - general
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - /etc/localtime:/etc/localtime:ro
+      - /dev:/dev
+
+  solution:
+    build:
+      context: .
+      args:
+        BASE_IMG: registry.gitlab.com/beerlab/iprofi2024/problem/master/base:latest
+    image: solution-master-img
+    container_name: solution_master
+    stdin_open: true
+    tty: true
+    environment:
+      - ROS_MASTER_URI=http://scene:11311
+      - DISPLAY
+      - XAUTORITY
+      - QT_X11_NO_MITSHM=1
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    depends_on: 
+      scene:
+        condition: service_healthy
+    networks:
+      - general
+    ipc: host
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - /etc/localtime:/etc/localtime:ro
+      - /dev:/dev
+      - ./:/ros_ws/src/solution_master
+
+networks:
+  general:
+    attachable: true
+    internal: false
+    driver: bridge
