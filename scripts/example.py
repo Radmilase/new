@@ -67,7 +67,11 @@ class Example(object):
         if not response.ok:
             print(response)
 
-    def got_to_using_trajectory(self, goal: np.ndarray, moving_time: float = 5):
+    def go_to_using_trajectory(self, goal: np.ndarray, moving_time: float = 5):
+        self.switch_controller(
+            start_controllers=["eff_joint_traj_controller"],
+            stop_controllers=["joint_group_eff_controller"]
+        )
         joints_str = JointTrajectory()
         joints_str.header = Header()
         joints_str.header.stamp = rospy.Time.now()
@@ -80,8 +84,14 @@ class Example(object):
         self.joint_trajectory_publisher.publish(joints_str)
         rospy.loginfo("position updated")
         
-    def servo_go_to():
+    def go_to_using_servo(self):
         # Do not use trajectory planning before start moving, go to goal immediately
+        self.switch_controller(
+            start_controllers=["joint_group_eff_controller"],
+            stop_controllers=["eff_joint_traj_controller"]
+        )
+        
+
 
     def camera_callback(self, msg):
         frame = self.bridge.imgmsg_to_cv2(msg)
@@ -93,6 +103,14 @@ class Example(object):
     def joint_states_callback(self, msg: JointState):
         self.joints_pose = msg.position
         self.joints_velocity = msg.velocity
+    
+    def shutdown(self):
+        # stop robots here
+        self.switch_controller(
+            start_controllers=["joint_group_eff_controller"],
+            stop_controllers=["eff_joint_traj_controller"]
+        )
+        self.joint_position_publisher()
 
     def spin(self):
 
@@ -100,11 +118,17 @@ class Example(object):
         t0 = rospy.get_time()
         while not rospy.is_shutdown():
             t = rospy.get_time() - t0
-
-
-            self.cmd_vel.publish(self.command)
-
+            if if t%60<10:
+                # Find garbage
+                self.go_to_using_servo(np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0]))
+            if t%60==10:
+                # To home position
+                self.go_to_using_trajectory(np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0]), 5)
+            if t%60==15:
+                # To garbage
+                self.go_to_using_trajectory(np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0]), 5)
             rate.sleep()
+            
 
 
 def main(args=None):
