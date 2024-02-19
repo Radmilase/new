@@ -77,7 +77,7 @@ class Example():
         )
         joints_trj = JointTrajectory()
         joints_trj.header = Header()
-        joints_trj.header.stamp = rospy.Time.now()
+        joints_trj.header.stamp = rospy.get_rostime()
         joints_trj.joint_names = JOINT_NAMES
         point = JointTrajectoryPoint()
         point.positions = goal.tolist()
