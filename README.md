@@ -29,7 +29,7 @@
 
 Запуск включает два шага:
 - В контейнере сервиса `scene` на основе образа `[scene]` запускается сцена в симуляторе gazebo [scene_master](https://gitlab.com/beerlab/iprofi2024_dev/problem/master_scene).
-- В контейнере сервиса `problem` на основе образа `[base]` запускается решение [solution_master](https://gitlab.com/beerlab/iprofi2024/problem/master).
+- В контейнере сервиса `solution` на основе образа `[base]` запускается решение [solution_master](https://gitlab.com/beerlab/iprofi2024/problem/master).
 
 Для автоматизации запуска запуска docker-контейнеров используется инструмент docker compose. Описание параметров запуска доступно в: `docker-compose.yml` и `docker-compose.nvidia.yml`.
 
@@ -83,11 +83,11 @@ docker compose -f docker-compose.yml up --build --pull always
 
 Если вы пишете на python, нужно, чтобы в `start.launch` была раскомментирована строка: 
 
-    <node name="example_node" pkg="master" type="example.py" output="screen"></node>
+    <node name="example_node" pkg="solution_master" type="example.py" output="screen"></node>
 
 Если вы пишете на C++, нужно, чтобы в `start.launch` была раскомментирована строка: 
 
-    <node name="example_node" pkg="master" type="example_node" output="screen"></node>
+    <node name="example_node" pkg="solution_master" type="example_node" output="screen"></node>
 
 ## Дополнительные полезные команды
 
@@ -101,9 +101,9 @@ docker compose -f docker-compose.yml up --build --pull always
 
 ### Подключение в контейнер
 
-Для открытия новой bash-сессии в сервисе решения: `problem` используйте команду:
+Для открытия новой bash-сессии в сервисе решения: `solution` используйте команду:
 
-    docker compose exec problem bash
+    docker compose exec solution bash
 
 Для открытия новой bash-сессии в сервисе сцены: `scene` используйте команду:
 
@@ -112,7 +112,7 @@ docker compose -f docker-compose.yml up --build --pull always
 ### Рестарт сцены или решения по отдельности
 Для перезапуска **решения** используйте:
 
-    docker compose restart problem
+    docker compose restart solution
 
 Для перезапуска **сцены** используйте:
 
